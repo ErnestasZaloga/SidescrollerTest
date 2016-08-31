@@ -9,7 +9,8 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.Array;
 
 public class SidescrollerTest extends ApplicationAdapter {
-	private final float GRAVITY = -9.8f; 
+//	private final float GRAVITY = -9.8f;
+	private final float GRAVITY = -6f;
 	
 	private Player player;
 	private Array<Entity> tiles = new Array<Entity>();
@@ -30,7 +31,8 @@ public class SidescrollerTest extends ApplicationAdapter {
 		float delta = Gdx.graphics.getDeltaTime();
 		/*Update world*/
 		//Apply gravity
-		player.getVelocity().y += GRAVITY;
+//		player.getVelocity().y += GRAVITY;
+		player.getVelocity().y = GRAVITY;
 		
 		//Update entities
 		player.update(delta);
@@ -50,7 +52,7 @@ public class SidescrollerTest extends ApplicationAdapter {
 	}
 	
 	private void setupLevel() {
-		player = new Player(new Texture("player.png"), 100, 500);
+		player = new Player(new Texture("player.png"), 100, 50);
 		for(int i = 0; i < 15; i++) {
 			tiles.add(new Entity(new Texture("grass.png"), i*32, 0));
 		}
@@ -61,7 +63,24 @@ public class SidescrollerTest extends ApplicationAdapter {
 			float intersectionW = 0f;
 			float intersectionH = 0f;
 			
-			if(((t.getX() < player.getX() && player.getX() < t.getX() + t.getWidth()) || (t.getX() < player.getX() + player.getWidth() && player.getX() + player.getWidth() < t.getX() + t. getWidth()))
+			/*if (RectA.Left < RectB.Right && RectA.Right > RectB.Left &&
+     RectA.Top < RectB.Bottom && RectA.Bottom > RectB.Top ) */
+			if(player.getX() < t.getX()+t.getWidth() && player.getX()+player.getWidth() > t.getX()
+					&& player.getY() < t.getY()+t.getHeight() && player.getY()+player.getHeight() > t.getY()) {
+
+				if(player.getY() > t.getY()) {
+					intersectionH = t.getY() - player.getY()+player.getHeight();
+				} else {
+					intersectionH = player.getY() - t.getY()+t.getHeight();
+				}
+				System.out.println(intersectionH);
+				
+				player.getVelocity().y = 0f;
+				player.setY(t.getY()+intersectionH);
+				
+			}
+			
+			/*if(((t.getX() < player.getX() && player.getX() < t.getX() + t.getWidth()) || (t.getX() < player.getX() + player.getWidth() && player.getX() + player.getWidth() < t.getX() + t. getWidth()))
 					&& ((t.getY() + t.getHeight() < player.getY() && player.getY() + player.getHeight() < t.getY()) || (t.getY() + t.getHeight() < player.getY() && player.getY() < t.getY() + t.getHeight()))) {
 				System.out.println("intersection!");
 				if(player.getX() < t.getX() + t.getWidth()) {
@@ -90,7 +109,7 @@ public class SidescrollerTest extends ApplicationAdapter {
 					}
 					player.getVelocity().y = 0f;
 				}
-			}
+			}*/
 		}
 	}
 	
