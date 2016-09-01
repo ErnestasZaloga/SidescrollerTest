@@ -8,7 +8,7 @@ public class DesktopLauncher {
 	public static void main (String[] arg) {
 		LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
 		
-//		config.width = 
+//		config.useGL30 = true;
 		
 		new LwjglApplication(new SidescrollerTest(), config);
 	}
