@@ -12,8 +12,8 @@ public class Player extends Entity {
 	}
 
 	public void update(float delta) {
-		this.x += velocity.x * delta;
-		this.y += velocity.y * delta;
+//		this.x += velocity.x * delta;
+//		this.y += velocity.y * delta;
 	}
 	
 	public Vector2 getVelocity() {

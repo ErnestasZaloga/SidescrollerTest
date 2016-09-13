@@ -44,26 +44,29 @@ public class SidescrollerTest extends ApplicationAdapter {
 		/*Update world*/
 		//Apply gravity
 		player.getVelocity().y += GRAVITY;
-//		player.getVelocity().y = GRAVITY;
 		
 		if(Gdx.input.isKeyPressed(Keys.A)) {
-			player.x -= 1;
+			player.getVelocity().x = -100;
+		} else if(Gdx.input.isKeyPressed(Keys.D)) {
+			player.getVelocity().x = 100;
+		} else {
+			player.getVelocity().x = 0;
 		}
-		if(Gdx.input.isKeyPressed(Keys.D)) {
-			player.x += 1;
-		}
-		if(Gdx.input.isKeyPressed(Keys.S)) {
+//		if(Gdx.input.isKeyPressed(Keys.S)) {
 //			player.y -= 1;
-		}
+//		}
 		if(Gdx.input.isKeyJustPressed(Keys.W)) {
 			player.getVelocity().y = 200;
 		}
+//		if(Gdx.input.isKeyPressed(Keys.W)) {
+//			player.y += 1;
+//		}
 		
 		//Update entities
 		player.update(delta);
 		
 		//Check collisions
-		checkCollisions();
+		checkCollisions(delta);
 		
 		//Render
 		Gdx.gl.glClearColor(0, 0, 1, 1);
@@ -95,89 +98,51 @@ public class SidescrollerTest extends ApplicationAdapter {
 	
 	private void setupLevel() {
 		player = new Player(new Texture("player.png"), 100, 40);
-//		tiles.add(new Entity(new Texture("grass.png"), 100, 0));
-//		tiles.add(new Entity(new Texture("grass.png"), 100, 100));
+		tiles.add(new Entity(new Texture("grass.png"), 100, 100));
 		for(int i = 0; i < 15; i++) {
 			tiles.add(new Entity(new Texture("grass.png"), i*32, 0));
 		}
+		
+		Entity t = new Entity(new Texture("grass.png"), 200, 40);
+		t.setHeight(5f); t.setWidth(100f);
+		tiles.add(t);
+		
 	}
 	
-	private void checkCollisions() {
-		x5 = 0;
-		y5 = 0;
-		x6 = 0;
-		y6 = 0;
-		for(Entity t : tiles) {
-			float intersectionW = 0f;
-			float intersectionH = 0f;
-			
-			if(player.getX() < t.getX()+t.getWidth() && player.getX()+player.getWidth() > t.getX()
-					&& player.getY() < t.getY()+t.getHeight() && player.getY()+player.getHeight() > t.getY()) {
-
-				float x1 = player.getX(); float x2 = player.getX()+player.getWidth();
-				float y1 = player.getY(); float y2 = player.getY()+player.getHeight();
-				
-				float x3 = t.getX(); float x4 = t.getX()+t.getWidth();
-				float y3 = t.getY(); float y4 = t.getY()+t.getHeight();
-				
-				x5 = Math.max(x1, x3);
-				y5 = Math.max(y1, y3);
-				x6 = Math.min(x2, x4);
-				y6 = Math.min(y2, y4);
-				
-				intersectionW = x6-x5;
-				intersectionH = y6-y5;
-				
-				if(intersectionW >= intersectionH) {
-					if(player.getX() < t.getX() + t.getWidth()) {
-//						player.setX(player.getX() + intersectionW);
-					} else if(player.getX() + player.getWidth() > t.getX()) {
-//						player.setX(player.getX() - intersectionW);
-					}
-					player.getVelocity().x = 0f;
-				} else {
-					if(player.getY() + player.getHeight() > t.getY()) {
-						player.setY(player.getY() - intersectionH);
-					} else if(player.getY() < t.getY() + t.getHeight()) {
-						player.setY(player.getY() + intersectionH);
-					}
-					player.getVelocity().y = 0f;
+	private void checkCollisions(float delta) {
+		float lastX = player.getX();
+		float lastY = player.getY();
+		float dx = player.getVelocity().x * delta;
+		float dy = player.getVelocity().y * delta;
+		
+		int numSteps = 5;
+		float stepX = dx / numSteps;
+		float stepY = dy / numSteps;
+		
+		for(int i = 0; i < numSteps; i++) {
+			//X axis
+			player.setX(player.getX() + stepX);
+			for(Entity t : tiles) {
+				if(player.getX() < t.getX()+t.getWidth() && player.getX()+player.getWidth() > t.getX()
+						&& player.getY() < t.getY()+t.getHeight() && player.getY()+player.getHeight() > t.getY()) {
+					player.setX(lastX);
+					break;
 				}
-				
-//				player.getVelocity().y = 0f;
-//				player.setY(player.getY()+intersectionH);
 			}
 			
-			/*if(((t.getX() < player.getX() && player.getX() < t.getX() + t.getWidth()) || (t.getX() < player.getX() + player.getWidth() && player.getX() + player.getWidth() < t.getX() + t. getWidth()))
-					&& ((t.getY() + t.getHeight() < player.getY() && player.getY() + player.getHeight() < t.getY()) || (t.getY() + t.getHeight() < player.getY() && player.getY() < t.getY() + t.getHeight()))) {
-				System.out.println("intersection!");
-				if(player.getX() < t.getX() + t.getWidth()) {
-					intersectionW = t.getX() + t.getWidth() - player.getX();
-				} else if(player.getX() + player.getWidth() > t.getX()) {
-					intersectionW = player.getX() + player.getWidth() - t.getX();
+			//Y axis
+			player.setY(player.getY() + stepY);
+			for(Entity t : tiles) {
+				if(player.getX() < t.getX()+t.getWidth() && player.getX()+player.getWidth() > t.getX()
+						&& player.getY() < t.getY()+t.getHeight() && player.getY()+player.getHeight() > t.getY()) {
+					player.setY(lastY);
+					player.getVelocity().y = 0;
+					break;
 				}
-				
-				if(player.getY() + player.getHeight() > t.getY()) {
-					intersectionH = player.getY() + player.getHeight() - t.getY();
-				} else if(player.getY() < t.getY() + t.getHeight()) {
-					intersectionH = t.getY() + t.getHeight() - player.getY();
-				}
-				
-				if(intersectionW >= intersectionH) {
-					if(player.getX() < t.getX() + t.getWidth()) {
-						player.setX(player.getX() + intersectionW);
-					} else if(player.getX() + player.getWidth() > t.getX()) {
-						player.setX(player.getX() - intersectionW);
-					}
-				} else {
-					if(player.getY() + player.getHeight() > t.getY()) {
-						player.setY(player.getY() - intersectionH);
-					} else if(player.getY() < t.getY() + t.getHeight()) {
-						player.setY(player.getY() + intersectionH);
-					}
-					player.getVelocity().y = 0f;
-				}
-			}*/
+			}
+			
+			lastX = player.getX();
+			lastY = player.getY();
 		}
 	}
 	
